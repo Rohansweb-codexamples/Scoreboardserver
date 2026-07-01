@@ -1,0 +1,313 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Scoreboard Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* (Keep existing styles unchanged) */
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <section class="panel">
+      <h2>Teams & Scores</h2>
+      <div class="teams-list" id="teamsList"></div>
+
+      <form class="new-team-form" id="newTeamForm">
+        <div class="field-group">
+          <label for="teamName">New team name</label>
+          <input type="text" id="teamName" placeholder="e.g. Red Dragons" required />
+        </div>
+        <button type="submit" class="btn-accent">Add team</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Display / Viewer</h2>
+      <div class="viewer-controls">
+        <div>
+          <span class="status-pill">
+            <span class="status-dot"></span>
+            Live sync via WebSocket
+          </span>
+        </div>
+        <div>
+          <p style="font-size:0.9rem; margin:0 0 6px;">
+            Open the viewer on your second screen (HDMI) using this file:
+          </p>
+          <div class="viewer-url">
+            <strong>viewer.html</strong><br />
+            Tip: Press <strong>F11</strong> in the viewer window for full-screen.
+          </div>
+        </div>
+        <button class="btn-outline" type="button" onclick="window.open('viewer.html', '_blank')">
+          Open viewer in new tab
+        </button>
+        <button class="btn-danger btn-small" type="button" onclick="resetAll()">
+          Reset all scores & teams
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io('https://scoreboardserver.onrender.com');
+
+    let teams = [];
+
+    function renderTeams() {
+      const container = document.getElementById("teamsList");
+      container.innerHTML = "";
+
+      if (teams.length === 0) {
+        container.innerHTML =
+          '<p style="opacity:0.7;font-size:0.9rem;">No teams yet. Add one below.</p>';
+        return;
+      }
+
+      teams.forEach((team, index) => {
+        const row = document.createElement("div");
+        row.className = "team-row";
+
+        const name = document.createElement("div");
+        name.className = "team-name";
+        name.textContent = team.name;
+
+        const score = document.createElement("div");
+        score.className = "score-display";
+        score.textContent = team.score;
+
+        const controls = document.createElement("div");
+        controls.className = "score-controls";
+
+        const minusBtn = document.createElement("button");
+        minusBtn.className = "btn-outline btn-small";
+        minusBtn.textContent = "-1";
+        minusBtn.onclick = () => updateScore(index, -1);
+
+        const plusBtn = document.createElement("button");
+        plusBtn.className = "btn-accent btn-small";
+        plusBtn.textContent = "+1";
+        plusBtn.onclick = () => updateScore(index, +1);
+
+        const plus5Btn = document.createElement("button");
+        plus5Btn.className = "btn-accent btn-small";
+        plus5Btn.textContent = "+5";
+        plus5Btn.onclick = () => updateScore(index, +5);
+
+        controls.append(minusBtn, plusBtn, plus5Btn);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "btn-danger btn-small";
+        deleteBtn.textContent = "✕";
+        deleteBtn.title = "Remove team";
+        deleteBtn.onclick = () => deleteTeam(index);
+
+        row.append(name, score, controls, deleteBtn);
+        container.appendChild(row);
+      });
+    }
+
+    function updateScore(index, delta) {
+      if (!teams[index]) return;
+      teams[index].score = Math.max(0, (teams[index].score || 0) + delta);
+      emitTeams();
+      renderTeams();
+    }
+
+    function deleteTeam(index) {
+      teams.splice(index, 1);
+      emitTeams();
+      renderTeams();
+    }
+
+    function resetAll() {
+      if (!confirm("Reset all teams and scores?")) return;
+      teams = [];
+      emitTeams();
+      renderTeams();
+    }
+
+    document.getElementById("newTeamForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = document.getElementById("teamName");
+      const name = input.value.trim();
+      if (!name) return;
+
+      teams.push({ name, score: 0 });
+      emitTeams();
+      renderTeams();
+
+      input.value = "";
+      input.focus();
+    });t
+
+    function emitTeams() {
+      socket.emit('updateTeams', teams);
+    }
+
+    socket.on('teams', (newTeams) => {
+      teams = newTeams;
+      renderTeams();
+    });
+
+    renderTeams();
+  </script>
+</body>
+</html>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* (Keep existing styles unchanged) */
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <section class="panel">
+      <h2>Teams & Scores</h2>
+      <div class="teams-list" id="teamsList"></div>
+
+      <form class="new-team-form" id="newTeamForm">
+        <div class="field-group">
+          <label for="teamName">New team name</label>
+          <input type="text" id="teamName" placeholder="e.g. Red Dragons" required />
+        </div>
+        <button type="submit" class="btn-accent">Add team</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Display / Viewer</h2>
+      <div class="viewer-controls">
+        <div>
+          <span class="status-pill">
+            <span class="status-dot"></span>
+            Live sync via WebSocket
+          </span>
+        </div>
+        <div>
+          <p style="font-size:0.9rem; margin:0 0 6px;">
+            Open the viewer on your second screen (HDMI) using this file:
+          </p>
+          <div class="viewer-url">
+            <strong>viewer.html</strong><br />
+            Tip: Press <strong>F11</strong> in the viewer window for full-screen.
+          </div>
+        </div>
+        <button class="btn-outline" type="button" onclick="window.open('viewer.html', '_blank')">
+          Open viewer in new tab
+        </button>
+        <button class="btn-danger btn-small" type="button" onclick="resetAll()">
+          Reset all scores & teams
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    let teams = [];
+
+    function renderTeams() {
+      const container = document.getElementById("teamsList");
+      container.innerHTML = "";
+
+      if (teams.length === 0) {
+        container.innerHTML =
+          '<p style="opacity:0.7;font-size:0.9rem;">No teams yet. Add one below.</p>';
+        return;
+      }
+
+      teams.forEach((team, index) => {
+        const row = document.createElement("div");
+        row.className = "team-row";
+
+        const name = document.createElement("div");
+        name.className = "team-name";
+        name.textContent = team.name;
+
+        const score = document.createElement("div");
+        score.className = "score-display";
+        score.textContent = team.score;
+
+        const controls = document.createElement("div");
+        controls.className = "score-controls";
+
+        const minusBtn = document.createElement("button");
+        minusBtn.className = "btn-outline btn-small";
+        minusBtn.textContent = "-1";
+        minusBtn.onclick = () => updateScore(index, -1);
+
+        const plusBtn = document.createElement("button");
+        plusBtn.className = "btn-accent btn-small";
+        plusBtn.textContent = "+1";
+        plusBtn.onclick = () => updateScore(index, +1);
+
+        const plus5Btn = document.createElement("button");
+        plus5Btn.className = "btn-accent btn-small";
+        plus5Btn.textContent = "+5";
+        plus5Btn.onclick = () => updateScore(index, +5);
+
+        controls.append(minusBtn, plusBtn, plus5Btn);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "btn-danger btn-small";
+        deleteBtn.textContent = "✕";
+        deleteBtn.title = "Remove team";
+        deleteBtn.onclick = () => deleteTeam(index);
+
+        row.append(name, score, controls, deleteBtn);
+        container.appendChild(row);
+      });
+    }
+
+    function updateScore(index, delta) {
+      if (!teams[index]) return;
+      teams[index].score = Math.max(0, (teams[index].score || 0) + delta);
+      emitTeams();
+      renderTeams();
+    }
+
+    function deleteTeam(index) {
+      teams.splice(index, 1);
+      emitTeams();
+      renderTeams();
+    }
+
+    function resetAll() {
+      if (!confirm("Reset all teams and scores?")) return;
+      teams = [];
+      emitTeams();
+      renderTeams();
+    }
+
+    document.getElementById("newTeamForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = document.getElementById("teamName");
+      const name = input.value.trim();
+      if (!name) return;
+
+      teams.push({ name, score: 0 });
+      emitTeams();
+      renderTeams();
+
+      input.value = "";
+      input.focus();
+    });
+
+    function emitTeams() {
+      socket.emit('updateTeams', teams);
+    }
+
+    socket.on('teams', (newTeams) => {
+      teams = newTeams;
+      renderTeams();
+    });
+
+    renderTeams();
+  </script>
+</body>
+</html>
