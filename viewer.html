@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Scoreboard Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* (Keep existing styles unchanged) */
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header class="header">
+      <div class="header-title">LIVE SCOREBOARD</div>
+      <div class="header-clock" id="clock"></div>
+    </header>
+
+    <main class="scoreboard" id="scoreboard"></main>
+
+    <footer class="footer">
+      Viewer is synced with admin via WebSocket. Press <strong>F11</strong> for full-screen.
+    </footer>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io('https://scoreboardserver.onrender.com');
+
+    function renderScoreboard(teams) {
+      const container = document.getElementById("scoreboard");
+      container.innerHTML = "";
+
+      if (teams.length === 0) {
+        container.innerHTML =
+          '<p style="text-align:center;opacity:0.7;font-size:1rem;">No teams configured. Open admin to add teams.</p>';
+        return;
+      }
+
+      teams.forEach((team) => {
+        const card = document.createElement("div");
+        card.className = "team-card";
+
+        const name = document.createElement("div");
+        name.className = "team-name";
+        name.textContent = team.name;
+
+        const score = document.createElement("div");
+        score.className = "team-score";
+        score.textContent = team.score;
+
+        const glow = document.createElement("div");
+        glow.className = "glow-bar";
+
+        card.append(name, score, glow);
+        container.appendChild(card);
+      });
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, "0");
+      const m = String(now.getMinutes()).padStart(2, "0");
+      const s = String(now.getSeconds()).padStart(2, "0");
+      document.getElementById("clock").textContent = `${h}:${m}:${s}`;
+    }
+
+    socket.on('teams', (teams) => {
+      renderScoreboard(teams);
+    });
+
+    // Initial render
+    renderScoreboard([]);
+    updateClock();
+
+    // Refresh clock every second
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* (Keep existing styles unchanged) */
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header class="header">
+      <div class="header-title">LIVE SCOREBOARD</div>
+      <div class="header-clock" id="clock"></div>
+    </header>
+
+    <main class="scoreboard" id="scoreboard"></main>
+
+    <footer class="footer">
+      Viewer is synced with admin via WebSocket. Press <strong>F11</strong> for full-screen.
+    </footer>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    function renderScoreboard(teams) {
+      const container = document.getElementById("scoreboard");
+      container.innerHTML = "";
+
+      if (teams.length === 0) {
+        container.innerHTML =
+          '<p style="text-align:center;opacity:0.7;font-size:1rem;">No teams configured. Open admin to add teams.</p>';
+        return;
+      }
+
+      teams.forEach((team) => {
+        const card = document.createElement("div");
+        card.className = "team-card";
+
+        const name = document.createElement("div");
+        name.className = "team-name";
+        name.textContent = team.name;
+
+        const score = document.createElement("div");
+        score.className = "team-score";
+        score.textContent = team.score;
+
+        const glow = document.createElement("div");
+        glow.className = "glow-bar";
+
+        card.append(name, score, glow);
+        container.appendChild(card);
+      });
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, "0");
+      const m = String(now.getMinutes()).padStart(2, "0");
+      const s = String(now.getSeconds()).padStart(2, "0");
+      document.getElementById("clock").textContent = `${h}:${m}:${s}`;
+    }
+
+    socket.on('teams', (teams) => {
+      renderScoreboard(teams);
+    });
+
+    // Initial render
+    renderScoreboard([]);
+    updateClock();
+
+    // Refresh clock every second
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>
